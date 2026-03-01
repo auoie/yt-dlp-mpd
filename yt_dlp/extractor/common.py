@@ -2849,11 +2849,15 @@ class InfoExtractor:
         """
         formats, subtitles = {}, {}
         for period in periods:
+            unique_formats: dict = {}
             for f in period['formats']:
+                format_key = tuple(v for k, v in f.items() if k not in
+                    ('format_id', 'fragments', 'manifest_stream_number'))
+                if format_key not in unique_formats:
+                    unique_formats[format_key] = f
+            for format_key, f in unique_formats.items():
                 assert 'is_dash_periods' not in f, 'format already processed'
                 f['is_dash_periods'] = True
-                format_key = tuple(v for k, v in f.items() if k not in (
-                    ('format_id', 'fragments', 'manifest_stream_number')))
                 if format_key not in formats:
                     formats[format_key] = f
                 elif 'fragments' in f:
